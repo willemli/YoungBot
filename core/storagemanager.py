@@ -1,3 +1,4 @@
+import os
 import json
 import time
 import threading
@@ -9,6 +10,10 @@ class StorageManager:
 
     def __init__(self, file_name):
         self.file_name = file_name
+
+        if not os.path.isfile(file_name):
+            print('[StorageManager] Storage file does not exists yet, creating new: ' + self.file_name)
+            json.dump({}, open(self.file_name, 'w'))
 
         if not self.load():
             print('[StorageManager] Fatal error, could not load ' + self.file_name)
