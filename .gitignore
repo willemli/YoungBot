@@ -1,0 +1,19 @@
+# Ignore settings file
+settings.json
+
+# Ignore storage file
+storage.json
+
+# Ignore python compiled files
+*.pyc
+
+# Ignore IntelliJ
+.idea/
+
+# Ignore .DS_STORE files on Mac
+.DS_STORE
+
+# Ignore debug files
+debug.txt
+failed.txt
+nohup.out
