@@ -1,8 +1,7 @@
 # YoungBot
 An extensible Telegram bot implementation written in Python.
 
-[![GitHub version](https://d25lcipzij17d.cloudfront.net/badge.svg?id=gh&type=6&v=1.0.0&x2=0)](http://badge.fury.io/gh/boennemann%2Fbadges)
-
+[![Python 3.6.7](https://img.shields.io/badge/Python-3.6.7-blue.svg)](https://www.python.org/downloads/release/python-360/)
 [![Open Source Love](https://badges.frapsoft.com/os/mit/mit.svg?v=102)](https://github.com/ellerbrock/open-source-badge/)
 
 ## Installation
