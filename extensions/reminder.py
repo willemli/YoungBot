@@ -3,6 +3,8 @@ from datetime import datetime, date
 from datetime import timedelta
 from dateutil import parser
 import json
+from telepot.namedtuple import InlineKeyboardMarkup, InlineKeyboardButton
+
 
 
 def json_serial(obj):
@@ -43,8 +45,22 @@ class Reminder:
         for i, reminder in enumerate(reminders):
             if parser.parse(reminder['date']) <= datetime.now() and reminder['send'] == False:
                 chat_id = reminder['chat_id']
-                self.message_sender.enqueue({'chat_id': chat_id,
+
+                inline_keyboards = []
+                options = ["Complete", "Remind me in 1 hour", "Remind me tomorrow"]
+                # Set inline keyboards
+                for index, option in enumerate(options):
+                    inline_keyboards.append(
+                        [InlineKeyboardButton(
+                            text=option,
+                            callback_data=json.dumps({'_': 'reminder', 'option': index})
+                        )]
+                    )
+                keyboard = InlineKeyboardMarkup(inline_keyboard=inline_keyboards)
+
+                self.message_sender.send({'chat_id': chat_id,
                                              'text': '<b>Reminder</b>\n\n' + reminder['reminder']
+                                            , 'reply_markup': keyboard
                                              })
                 reminder['send'] = True
                 to_delete.append(reminder)
@@ -80,18 +96,13 @@ class Reminder:
                     self.message_sender.enqueue({'chat_id': chat_id,
                                                  'text': '<b>Error</b>\n\nPlease enter the date and time in the following format: \n\nDate Time'
                                                  })
-
                 if date < datetime.now():
                     self.message_sender.enqueue({'chat_id': chat_id,
                                                  'text': '<b>Error</b>\n\nYou cannot add reminders in the past'
                                                  })
                     return
 
-                reminders = json.loads(self.storage.get('reminders'))
-
-                reminders.append({'date': date, 'reminder': reminder, 'chat_id': chat_id, 'send': False})
-
-                self.storage.put('reminders', json.dumps(reminders, default=json_serial))
+                self.set_reminder(reminder, date, chat_id)
                 self.message_sender.enqueue({'chat_id': chat_id,
                                              'text': '<b>Successfully added reminder</b>\n\n' + str(date) + '\n\n' + reminder
                                                      })
@@ -100,6 +111,12 @@ class Reminder:
                 self.message_sender.enqueue({'chat_id': chat_id,
                                              'text': '<b>Error</b>\n\nPlease enter the reminder in the following format: \n\n/remind Date Time Reminder'
                                              })
+    def set_reminder(self, reminder, date, chat_id):
+        reminders = json.loads(self.storage.get('reminders'))
+
+        reminders.append({'date': date, 'reminder': reminder, 'chat_id': chat_id, 'send': False})
+
+        self.storage.put('reminders', json.dumps(reminders, default=json_serial))
 
     def get_date(self, date, time):
         try:
@@ -138,3 +155,37 @@ class Reminder:
         self.message_sender.enqueue({'chat_id': chat_id,
                                      'text': msg
                                      })
+
+    def callback(self, message):
+        data = json.loads(message['data'])
+        chat_id = message['message']['chat']['id']
+        option = data['option']
+        message_id = (message['message']['chat']['id'], message['message']['message_id'])
+        text = message['message']['text']
+        text = text.split("Reminder\n\n")[1]
+
+        if option == 0:
+            msg = '<b>Completed Reminder</b>\n\n' + text
+            self.message_sender.send(
+                {'msg_identifier': message_id, 'type': 'edit', 'text': msg})
+            self.message_sender.answerCallbackQuery(message['id'], 'Reminder Completed')
+
+        elif option == 1:
+            msg = '<b>Set new reminder in 1 hour</b>\n\n' + text
+
+            self.set_reminder(text, datetime.now() + timedelta(hours=1), chat_id)
+
+            self.message_sender.send(
+                {'msg_identifier': message_id, 'type': 'edit', 'text': msg})
+            self.message_sender.answerCallbackQuery(message['id'], 'Set new reminder in 1 hour')
+
+        elif option == 2:
+            msg = '<b>Set new reminder in 1 day</b>\n\n' + text
+
+            self.set_reminder(text, datetime.now() + timedelta(days=1), chat_id)
+
+            self.message_sender.send(
+                {'msg_identifier': message_id, 'type': 'edit', 'text': msg})
+            self.message_sender.answerCallbackQuery(message['id'], 'Set new reminder in 1 day')
+
+
