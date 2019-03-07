@@ -120,11 +120,14 @@ class MessageSender:
                         self._queue.append(message_copy)
                         time.sleep(1)
                 else:
-                    log_file = self.settings_manager.get('failed_log')
-                    print('[MessageSender-QueueHandler] Could not send message, appending to ' + log_file)
-                    with open(log_file, 'a') as f:
-                        f.write(json.dumps(message))
-                        f.write('\n')
+                    try:
+                        log_file = self.settings_manager.get('failed_log')
+                        print('[MessageSender-QueueHandler] Could not send message, appending to ' + log_file)
+                        with open(log_file, 'a') as f:
+                            f.write(json.dumps(message))
+                            f.write('\n')
+                    except Exception as e:
+                        print('[MessageSender-QueueHandler] Could append failed message to failed log!')
 
             time.sleep(0.01)
 
