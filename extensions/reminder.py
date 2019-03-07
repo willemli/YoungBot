@@ -66,7 +66,8 @@ class Reminder:
                 to_delete.append(reminder)
         for r in to_delete:
             reminders.remove(r)
-        self.storage.put('reminders', json.dumps(reminders, default=json_serial))
+        if len(to_delete) > 0:
+            self.storage.put('reminders', json.dumps(reminders, default=json_serial))
 
     def chat(self, message):
 
