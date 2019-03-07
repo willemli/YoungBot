@@ -135,10 +135,10 @@ class Reminder:
         reminders = json.loads(self.storage.get('reminders'))
 
         for r in reminders:
-            if r[2] == chat_id:
+            if r['chat_id'] == chat_id:
                 res.append(r)
 
-        res.sort(key=lambda x: x[0])
+        res.sort(key=lambda x: x['date'])
 
         msg = '<b>Reminders</b>\n\n'
 
@@ -150,7 +150,7 @@ class Reminder:
             return
 
         for r in res:
-            msg += str(r[0]) + ' '  + r[1]
+            msg += str(parser.parse(r['date'])) + ' '  + r['reminder']
             msg += '\n'
 
         self.message_sender.enqueue({'chat_id': chat_id,
