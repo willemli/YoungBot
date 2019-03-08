@@ -97,7 +97,7 @@ class Reminder:
                     self.message_sender.enqueue({'chat_id': chat_id,
                                                  'text': '<b>Error</b>\n\nPlease enter the date and time in the following format: \n\nDate Time'
                                                  })
-                if date < datetime.now():
+                elif date < datetime.now():
                     self.message_sender.enqueue({'chat_id': chat_id,
                                                  'text': '<b>Error</b>\n\nYou cannot add reminders in the past'
                                                  })
@@ -123,7 +123,7 @@ class Reminder:
         try:
             if 'today' in date:
                 return parser.parse(time)
-            if 'tommorow' in date:
+            if 'tomorrow' in date:
                 return parser.parse(time) + timedelta(days=1)
             else:
                 return parser.parse(date + ' ' + time)
@@ -150,7 +150,7 @@ class Reminder:
             return
 
         for r in res:
-            msg += str(parser.parse(r['date'])) + ' '  + r['reminder']
+            msg += str(parser.parse(r['date']).strftime("%d %B %Y %I:%M%p")) + ' '  + r['reminder']
             msg += '\n'
 
         self.message_sender.enqueue({'chat_id': chat_id,
