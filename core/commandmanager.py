@@ -1,3 +1,5 @@
+import re
+
 class CommandManager:
 
     commands = {}
@@ -6,19 +8,24 @@ class CommandManager:
     Add command
     '''
     def add(self, extension, command):
-        prefix = command.get('prefix')
-        description = command.get('description')
-
         if not extension in self.commands:
             self.commands.update({extension: []})
 
-        self.commands[extension].append({
+        new_command = {
             'extension': extension,
-            'prefix': prefix,
-            'description': description
-        })
+            'description': command.get('description')
+        }
 
-        print('[CommandManager] Added command for '+extension+': '+prefix)
+        if 'pattern' in command:
+            pattern = command.get('pattern')
+            new_command.update({'pattern': pattern})
+            print('[CommandManager] Added command for '+extension+': '+pattern)
+        else:
+            prefix = command.get('prefix')
+            new_command.update({'prefix': prefix})
+            print('[CommandManager] Added command for '+extension+': '+prefix)
+
+        self.commands[extension].append(new_command)
 
 
     '''
@@ -43,6 +50,10 @@ class CommandManager:
     '''
     def get_extension(self, text):
         for command in self.get_all_commands():
-            if text.startswith(command['prefix']):
-                return command['extension']
+            if 'pattern' in command:
+                if re.search(command['pattern'], text):
+                    return command['extension']
+            else:
+                if text.startswith(command['prefix']):
+                    return command['extension']
         return None
